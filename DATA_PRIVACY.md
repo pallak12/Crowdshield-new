@@ -1,61 +1,103 @@
 # CrowdShield Data Privacy & Ethics
 
 ## Purpose
-This document describes how CrowdShield handles sensitive data, what is collected, and how to protect user privacy and ethical operation when using the application.
 
-## What is collected
-- High-level event logs that describe system actions, operator commands, and status updates.
-- Operational metadata such as timestamps, event categories, and action outcomes.
-- Application metrics needed for analysis and safe system operation.
+CrowdShield is intended to support public safety while minimizing unnecessary collection of personal information.
 
-## What is not collected by default
-- No personally identifiable information (PII) such as names, email addresses, phone numbers, or identity documents.
-- No raw audio recordings or unredacted speech transcripts unless explicitly configured by an operator and a secure backend.
-- No geolocation data tied to identifiable individuals.
+## Current prototype
 
-## Voice command handling
-- Voice commands should be treated as sensitive input.
-- The backend stub included in `backend/server.js` is designed to redact voice text and store only minimal command metadata.
-- If raw transcripts are ever required, they must be encrypted at rest, access-controlled, and retained only for a limited, documented period.
+The current repository primarily uses simulated crowd data and application events. It does **not** process a live CCTV feed.
+
+### Data used
+
+- Simulated crowd metrics
+- Scenario state
+- Operational events
+- Operator actions
+- Timestamps and action outcomes
+- Incident-report information entered through the prototype UI
+
+### Not collected by default
+
+- Names or identity documents
+- Facial recognition data
+- Raw CCTV/video footage
+- Individual-level movement histories
+- Identifiable geolocation histories
+
+## Public imagery and future CCTV integration
+
+If connected to CCTV or other imagery, privacy should be built into the pipeline:
+
+```text
+Camera
+  |
+  v
+Local/edge processing
+  |
+  v
+Aggregate crowd features
+  |
+  +--> discard unnecessary raw imagery
+  |
+  v
+Risk analysis
+```
+
+Preferred outputs are crowd-level features such as density, occupancy, movement speed, flow conflict and bottleneck level. Face recognition and persistent individual tracking should not be required.
 
 ## Data minimization
-- Store only the minimum information needed for safe operation and auditing.
-- Prefer event labels and outcomes over raw user text.
-- Avoid keeping detailed logs longer than necessary.
 
-## Retention and deletion
-- Define a retention policy before deploying in a live environment.
-- Recommended default retention: 30 days for operational logs, unless a different regulatory requirement applies.
-- Periodically purge older logs and archived data.
+Collect only information needed to detect crowd conditions, support operator decisions, audit safety actions and evaluate system performance.
 
-## Secure transport and storage
-- Always use HTTPS/TLS for backend communication.
-- Protect authorization tokens and secrets in environment variables, not source code.
-- Use strong bearer tokens, rotate them regularly, and store them securely.
+Prefer aggregated metrics and event labels over raw personal content.
 
-## Access control and auditing
-- Restrict access to logs and backend controls to authorized operators only.
-- Record audit trails for actions that open gates, deploy security, or initiate evacuations.
-- Do not expose audit logs to public or unauthorized users.
+## Voice commands
 
-## Consent and legal compliance
-- Obtain clear consent from operators who interact with the system.
-- If the system is deployed in a jurisdiction with data protection laws (GDPR, PDPA, CCPA, etc.), follow the applicable requirements.
-- Document any data sharing agreements and cross-border data transfer policies.
+Voice input is potentially sensitive. Raw transcripts should not be retained unless there is a documented operational reason, lawful basis, access control, encryption and retention policy.
 
-## Ethical operating principles
-- Use the system to enhance safety, not to surveil or discriminate against individuals.
-- Avoid automated actions that could endanger people without a human review step.
-- Implement fail-safe behavior when the system cannot confirm a safe outcome.
+## Incident reports
 
-## Deployment guidance
-- Treat the included backend stub as a starting point, not a production-ready service.
-- For production, add:
-  - strong authentication and role-based access control
-  - secure log storage and encryption
-  - data retention and deletion workflows
-  - legal and compliance review
+Collect only information needed to understand and respond to an incident. Production deployments should provide clear notice about data handling.
 
-## Notes
-- The root README has been updated to reference this document.
-- Use `backend/README.md` for details on how to run the secure backend stub that complements CrowdShield.
+## Retention
+
+The current prototype uses in-memory backend storage.
+
+Before production deployment, define retention periods, deletion procedures, legal requirements and authorized access. Retention should be as short as practical.
+
+## Security
+
+Production deployment should use HTTPS/TLS, secure secret management, strong authentication, role-based access control, encrypted storage, audit logs, rate limiting, input validation and regular security review.
+
+The current backend demonstrates several of these patterns but is not a production security system.
+
+## Human oversight
+
+CrowdShield is a decision-support system. High-impact interventions should remain subject to authorized human review. Operators should be able to reject or override recommendations.
+
+## Fairness and non-discrimination
+
+Risk analysis should be based on crowd-safety signals rather than identity characteristics. The system should not be used to profile individuals, discriminate against groups, infer sensitive attributes or perform unnecessary surveillance.
+
+## Fail-safe behavior
+
+If sensors, connectivity or prediction confidence become unreliable, the system should clearly indicate degraded status rather than presenting uncertain results as facts.
+
+## Governance
+
+Before real-world deployment, the responsible authority should complete a privacy and legal review covering applicable Indian data-protection requirements, CCTV/public-imagery rules, data sharing, retention, access control, incident response and vendor/cloud responsibilities.
+
+## Current limitations
+
+This document describes design principles and future safeguards. It is not a legal compliance certification.
+
+## Future privacy improvements
+
+- Edge-based video analytics
+- No face recognition by default
+- Short-lived or zero-retention raw imagery
+- Aggregated feature transmission
+- Role-based access
+- Privacy impact assessment
+- Formal retention/deletion workflows
